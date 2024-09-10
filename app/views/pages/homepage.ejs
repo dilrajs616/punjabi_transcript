@@ -1,0 +1,195 @@
+<div class="bg-inherit p-8 rounded-lg shadow-lg max-w-lg w-full mt-5">
+    <h1 class="text-2xl font-bold mb-4 text-center">Choose an Option</h1>
+
+    <!-- Form Section -->
+    <form id="audioForm" class="space-y-6">
+        <div>
+            <select id="choice" name="choice" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="transcript">Transcript Only</option>
+                <option value="gurbani">Gurbani Search</option>
+            </select>
+        </div>
+
+        <!-- Mic Button Section -->
+        <div class="flex flex-col items-center justify-center">
+            <button id="mic-button" type="button" class="w-20 h-20 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none flex items-center justify-center">
+                🎤
+            </button>
+            <p id="status" class="mt-4 text-gray-600">Click the mic to record</p>
+        </div>
+
+        <input type="hidden" id="audioData" name="audioData" value="">
+
+        <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Submit</button>
+    </form>
+    <div class="bg-white p-4 border border-gray-200 rounded-md shadow-md max-w-md mx-auto mt-5">
+        <p id="dynamic-text" class="text-gray-800">Result will appear here.</p>
+    </div>          
+</div>
+
+<script>
+    document.querySelector("#mic-button").addEventListener("click", async () => {
+      const micButton = document.querySelector("#mic-button");
+      const statusText = document.querySelector("#status");
+      const audioDataInput = document.querySelector("#audioData");
+  
+      let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let recorder = new MediaRecorder(stream);
+      let chunks = [];
+  
+      recorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+  
+      recorder.onstop = async () => {
+        let audioBlob = new Blob(chunks, { type: "audio/wav" });
+        let reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          audioDataInput.value = reader.result.split(",")[1]; // Set the base64 audio data
+          statusText.textContent = "Recording complete. Ready to submit.";
+        };
+      };
+  
+      statusText.textContent = "Recording...";
+      recorder.start();
+      setTimeout(() => {
+        recorder.stop();
+        statusText.textContent = "Processing audio...";
+      }, 5000); // Record for 5 seconds
+    });
+  
+    document.querySelector("#audioForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+  
+      const formData = new FormData(e.target);
+      const choice = formData.get("choice");
+      const audioData = formData.get("audioData");
+  
+      try {
+        const response = await fetch(`/${choice}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ audioData }),
+        });
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error:", errorText);
+          document.querySelector("#dynamic-text").textContent = "Error processing request.";
+        } else {
+          const data = await response.json();
+          const transcript = data.transcript || "No transcript available";
+          document.querySelector("#dynamic-text").textContent = transcript;
+        }
+      } catch (err) {
+        console.error("Error:", err.message);
+        document.querySelector("#dynamic-text").textContent = "Error occurred.";
+      }
+    });
+</script>
+  
+
+<!-- <script>
+   const micButton = document.getElementById('mic-button');
+    const statusText = document.getElementById('status');
+    const recordingTime = 5; // Recording time in seconds
+    let countdownInterval;
+    let base64Audio = '';
+    const form = document.getElementById('audioForm');
+
+    // Function to record audio and convert to base64
+    async function recordAudio() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                reject("Your browser does not support audio recording.");
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    const mediaRecorder = new MediaRecorder(stream);
+                    const audioChunks = [];
+                    let timeLeft = recordingTime;
+
+                    // Start the countdown timer in the status text
+                    statusText.textContent = `Recording... ${timeLeft}s left`;
+
+                    countdownInterval = setInterval(() => {
+                        timeLeft -= 1;
+                        if (timeLeft > 0) {
+                            statusText.textContent = `Recording... ${timeLeft}s left`;
+                        }
+                    }, 1000);
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.start();
+
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                        clearInterval(countdownInterval);
+                        statusText.textContent = "Recording stopped.";
+                    }, recordingTime * 1000);
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            const base64String = reader.result.split(',')[1]; // Base64 encoding
+                            resolve(base64String);
+                        };
+                        reader.readAsDataURL(audioBlob);
+                    };
+                })
+                .catch(err => reject(err));
+        });
+    }
+
+    micButton.addEventListener('click', async () => {
+        try {
+            base64Audio = await recordAudio();
+            statusText.textContent = "Recording complete!";
+        } catch (err) {
+            console.error("Error recording audio:", err);
+            statusText.textContent = "Recording failed.";
+        }
+    });
+
+    // Form Submission
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const selectedChoice = document.getElementById('choice').value;
+        const actionUrl = selectedChoice === 'transcript' ? '/transcript' : '/gurbani';
+
+        // Check if audio has been recorded
+        if (!base64Audio) {
+            statusText.textContent = "Please record audio before submitting.";
+            return;
+        }
+
+        // Submitting form via fetch
+        fetch(actionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                audioData: base64Audio
+            })
+        }).then(response => {
+            if (response.ok) {
+                statusText.textContent = "Audio submitted successfully!";
+            } else {
+                statusText.textContent = "Failed to submit audio.";
+            }
+        }).catch(error => {
+            console.error("Error submitting form:", error);
+            statusText.textContent = "An error occurred.";
+        });
+    });
+</script> -->

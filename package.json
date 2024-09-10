@@ -1,0 +1,37 @@
+{
+  "name": "gurbani-search",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "watch": "conc \"tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch\"  \"nodemon index.js\" "
+  },
+  "author": "Dilraj Singh",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.4.20",
+    "body-parser": "^1.20.3",
+    "concurrently": "^9.0.0",
+    "config": "^3.3.12",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.20.0",
+    "express-ejs-layouts": "^2.5.1",
+    "express-layouts": "^1.0.0",
+    "module-alias": "^2.2.3",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.4",
+    "tailwindcss": "^3.4.10"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@routes": "app/routes",
+    "@controllers": "app/controllers",
+    "@views": "app/views"
+  },
+  "devDependencies": {
+    "daisyui": "^4.12.10"
+  }
+}

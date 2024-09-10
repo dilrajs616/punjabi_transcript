@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khalis Demo</title>
+    <link rel="stylesheet" href="/css/output.css">
+</head>
+<body>
+  <div class="navbar bg-base-100">
+    <div class="flex-1">
+      <a href="/">
+        <div class="w-10 rounded-full">
+          <img
+            alt="KHALIS logo"
+            src="/image/logo.png" />
+        </div>
+        <a class="btn btn-ghost text-xl">KHALIS</a>
+      </a>
+    </div>
+    <div class="flex-none">
+      <ul class="menu menu-horizontal px-1">
+        <li><a href="https://khalisfoundation.org/">Organisation</a></li>
+        <li>
+          <details>
+            <summary>Menu</summary>
+            <ul class="bg-base-100 rounded-t-none p-2">
+              <li><a href="https://dilrajs616.github.io/">Documentation</a></li>
+              <li><a href="https://dilrajs616.github.io/contact.html">Contact Us</a></li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+      <div class="flex flex-col text-center items-center justify-center">
+        <%- body %>
+      </div>
+</body>
+</html>
