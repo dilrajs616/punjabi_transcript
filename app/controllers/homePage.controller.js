@@ -61,4 +61,9 @@ router.post("/transcript", async (req, res) => {
     }
 });
 
+router.post('/gurbani', async (req, res) => {
+  const transcript = "this endpoint is under work";
+  res.json({ message: "Working on it", transcript });
+});
+
 module.exports = router;
