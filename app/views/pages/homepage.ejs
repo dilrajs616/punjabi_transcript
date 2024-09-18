@@ -81,6 +81,7 @@
           document.querySelector("#dynamic-text").textContent = "Error processing request.";
         } else {
           const data = await response.json();
+          console.log(data)
           const transcript = data.transcript || "No transcript available";
           document.querySelector("#dynamic-text").textContent = transcript;
         }

@@ -53,8 +53,13 @@ router.post("/transcript", async (req, res) => {
       // Extract the transcript from the response
       const transcript = data.results[0]?.alternatives[0]?.transcript || "No transcript available";
 
+      const words = transcript.split(" ");
+      const initialChars = words.map(word => word.charAt(0)).join(" ");
+
+      console.log(initialChars);
+
       // Send the transcript back in the response
-      res.json({ message: "Transcription successful", transcript });
+      return res.json({ message: "Transcription successful", initialChars });
     } catch (error) {
       console.error("Error:", error.message);
       res.status(500).json({ error: "Internal server error" });
