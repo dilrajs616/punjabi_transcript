@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
 });
 
 router.post("/transcript", async (req, res) => {
-    const { audioData } = req.body;
+    const { audioData, initials } = req.body;
     if (!audioData) {
       return res.status(400).json({ error: "No audio data received" });
     }
@@ -51,15 +51,16 @@ router.post("/transcript", async (req, res) => {
       const data = await response.json();
 
       // Extract the transcript from the response
-      const transcript = data.results[0]?.alternatives[0]?.transcript || "No transcript available";
+      let transcript = data.results[0]?.alternatives[0]?.transcript || "No transcript available";
 
-      const words = transcript.split(" ");
-      const initialChars = words.map(word => word.charAt(0)).join(" ");
-
-      console.log(initialChars);
+      if (initials) {
+        const words = transcript.split(" ");
+        const initialChars = words.map(word => word.charAt(0)).join(" ");
+        transcript = initialChars;
+      }
 
       // Send the transcript back in the response
-      return res.json({ message: "Transcription successful", initialChars });
+      return res.json({ message: "Transcription successful", transcript });
     } catch (error) {
       console.error("Error:", error.message);
       res.status(500).json({ error: "Internal server error" });
